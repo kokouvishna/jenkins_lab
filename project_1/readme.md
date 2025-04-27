@@ -1,6 +1,6 @@
 # Jenkins based projects
 
-## Project 1
+## Build and deploy Java based application
 In this project we'll build and deploy a java based application. We build the application with maven
 and deploy it using docker.
 The java application is a fully fledged application with a frontent, backend and database.
