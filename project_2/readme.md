@@ -1,6 +1,7 @@
 ## Project 2 - Build and deploy multi-container NodeJS fullsatck application (frontend, backend and database)
 
 Lets install some plugins; Dashboard > Manage Jenkins > Plugins:
+- Eclipse Temurin installer
 - SonarQube Scanner
 - OWASP Dependency-Check
 //- Config File Provider (push artifact to the nexus server)
