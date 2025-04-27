@@ -1,0 +1,99 @@
+pipeline {
+    agent any
+    
+    tools{
+        jdk 'jdk17'
+        maven 'maven3'
+    }
+    
+    environment{
+        SCANNER_HOME= tool 'sonar-scanner'
+    }
+
+    stages {
+        stage('Git Checkout') {
+            steps {
+                git branch: 'master', url: 'https://github.com/kokouvishna/jenkins_lab.git'
+            }
+        }
+        
+        stage('Compile Source Code') {
+            steps {
+                sh 'mvn compile'
+            }
+        }
+        
+        stage('Trivy File System Scan') {
+            steps {
+                sh 'trivy fs .'
+            }
+        }
+        
+        stage('OWASP Filesystem Scan') {
+            steps {
+                dependencyCheck additionalArguments: '--scan ./ ', odcInstallation: 'DC'
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+            }
+        }
+        
+        stage('Sonarqube Analysis') {
+            steps {
+                withSonarQubeEnv('sonar') {
+                    sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=EKART \
+                    -Dsonar.java.binaries=. \
+                    -Dsonar.projectKey=EKART '''
+                }
+                
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'mvn package -DskipTests=true'
+            }
+        }
+        
+        stage('Deploy to Nexus') {
+            steps {
+                withMaven(globalMavenSettingsConfig: 'global-settings-xml') {
+                    sh 'mvn deploy -DskipTests=true'
+                }
+            }
+        }
+        
+        stage('Build And Tag Docker Image') {
+            steps {
+                script{
+                    // This step should not normally be used in your script. Consult the inline help for details.
+                    withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
+                        sh 'docker build -t shopping-cart:dev -f docker/Dockerfile .'
+                        sh 'docker tag shopping-cart:dev kokouvishna/shopping-cart:dev'
+                    }
+                }
+            }
+        }
+        
+        stage('Push Docker Image') {
+            steps {
+                script{
+                    // This step should not normally be used in your script. Consult the inline help for details.
+                    withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
+                        sh 'docker push kokouvishna/shopping-cart:dev'
+                    }
+                }
+            }
+        }
+        
+        stage('Deploy Application') {
+            steps {
+                script{
+                    // This step should not normally be used in your script. Consult the inline help for details.
+                    withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
+                        sh 'docker run -d --name ekart -p 8070:8070 kokouvishna/shopping-cart:dev'
+                    }
+                }
+            }
+        }
+        
+    }
+}
