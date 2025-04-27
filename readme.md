@@ -9,6 +9,16 @@ Lets install some plugins; Dashboard > Manage Jenkins > Plugins:
 - Docker, Docker Pipeline, docker-build-step
 - Pipeline Maven Integration
 
+![screenshot](images/jenkins_tools/jdk.PNG)
+
+![screenshot](images/jenkins_tools/maven.PNG)
+
+![screenshot](images/jenkins_tools/docker.PNG)
+
+![screenshot](images/jenkins_tools/dc.PNG)
+
+![screenshot](images/jenkins_tools/sq.PNG)
+
 Lets configure the installed plugins, so that they are available for usage in our pipeline
 Dashboard > Manage Jenkins > Tools:
 `Install automatically` is always set.
@@ -54,3 +64,9 @@ sudo apt-get install trivy
 ````
 
 After building, and deploying the app, it can be accessed via `localhost:8070`. User and password are both `admin`.
+
+![screenshot](images/nexus.PNG)
+
+![screenshot](images/sonarqube.PNG)
+
+![screenshot](images/docker_repo.PNG)
